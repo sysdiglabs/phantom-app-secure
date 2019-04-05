@@ -1,0 +1,68 @@
+{
+  "appid": "b45a0fcb-1cef-4cc3-a120-49d6b892ce6c",
+  "name": "Sysdig",
+  "description": "This app provides Sysdig integration with your Kubernetes cluster.",
+  "type": "information",
+  "product_vendor": "Sysdig",
+  "logo": "sysdig.svg",
+  "logo_dark": "sysdig_dark.svg",
+  "product_name": "Sysdig",
+  "product_version_regex": ".*",
+  "publisher": "Sysdig",
+  "license": "Copyright (c) Sysdig, 2019",
+  "app_version": "1.1.0",
+  "utctime_updated": "2018-09-13T11:18:00.503036Z",
+  "package_name": "phantom_sysdig",
+  "main_module": "sysdig_connector.py",
+  "min_phantom_version": "4.0.1068",
+  "app_wizard_version": "1.1.0",
+  "pip_dependencies": {
+    "pypi": [
+      {"module": "kubernetes==6.0.0"},
+      {"module": "sdcclient==0.7.0"}
+    ]
+  },
+  "configuration": {
+    "duration_in_seconds": {
+      "description": "Amount of seconds which Sysdig is capturing data",
+      "data_type": "numeric",
+      "required": true,
+      "default": 120
+    },
+    "kubernetes_config": {
+      "description": "The Kubernetes config file content encoded in base64",
+      "data_type": "string",
+      "required": true
+    },
+    "sysdig_api_token": {
+      "description": "The Sysdig Platform API Token",
+      "data_type": "password",
+      "required": true
+    },
+    "sysdig_api_endpoint": {
+      "description": "The Sysdig Platform API URL (change if you use on-prem)",
+      "data_type": "string",
+      "required": true,
+      "default": "https://app.sysdigcloud.com"
+    }
+  },
+  "actions": [
+    {
+      "action": "start_capture",
+      "identifier": "start_capture",
+      "description": "Capture activity for a Pod",
+      "verbose": "This action captures activity from a Kubernetes pod using Sysdig Platform",
+      "type": "investigate",
+      "read_only": true,
+      "parameters": {
+        "pod_name": {
+          "description": "The name of the Pod which is going to be captured",
+          "data_type": "string",
+          "required": true
+        }
+      },
+      "output": [],
+      "versions": "EQ(*)"
+    }
+  ]
+}
