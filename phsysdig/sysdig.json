@@ -43,7 +43,7 @@
       "description": "The Sysdig Platform API URL (change if you use on-prem)",
       "data_type": "string",
       "required": true,
-      "default": "https://app.sysdigcloud.com"
+      "default": "https://secure.sysdig.com"
     }
   },
   "actions": [
