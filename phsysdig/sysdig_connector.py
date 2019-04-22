@@ -28,8 +28,6 @@ class RetVal(tuple):
 class SysdigConnector(BaseConnector):
 
     def __init__(self):
-
-        # Call the BaseConnectors init first
         super(SysdigConnector, self).__init__()
 
         self._state = None
@@ -43,43 +41,36 @@ class SysdigConnector(BaseConnector):
         self._sysdig_client = None
 
     def _handle_start_capture(self, param):
-
-        # Implement the handler here
-        # use self.save_progress(...) to send progress messages back to the platform
         self.save_progress("In action handler for: {0}".format(self.get_action_identifier()))
-
-        # Add an action result object to self (BaseConnector) to represent the action for this param
         action_result = self.add_action_result(ActionResult(dict(param)))
 
-        # Access action parameters passed in the 'param' dictionary
         pod_name = param['pod_name']
         event_time = int(time.time())
-        job_name = 'sysdig-{}-{}'.format(pod_name, event_time)
+        job_name = '{}-{}'.format(pod_name, event_time)
 
         hostname = self._kubernetes_client.find_node_running_pod(pod_name)
-        hostname = hostname.split(".")[0]
-        ok, data = self._sysdig_client.create_sysdig_capture(hostname=hostname, capture_name=job_name,
-                                                            duration=self._duration_in_seconds, capture_filter=None)
+        ok, data = self._sysdig_client.create_sysdig_capture(
+            hostname=hostname,
+            capture_name=job_name,
+            duration=self._duration_in_seconds,
+            capture_filter=None
+        )
 
         if not ok:
             raise Exception(data)
 
-        # Add the response into the data section
-        # action_result.add_data(response)
+        data = data['dump']
+        data['customerKey'] = None
+        action_result.add_data(data)
 
         # Add a dictionary that is made up of the most important values from data into the summary
         # summary = action_result.update_summary({})
         # summary['num_data'] = len(action_result['data'])
 
-        # Return success, no need to set the message, only the status
-        # BaseConnector will create a textual message based off of the summary dictionary
         return action_result.set_status(phantom.APP_SUCCESS)
 
     def handle_action(self, param):
-
         ret_val = phantom.APP_SUCCESS
-
-        # Get the action that we are supposed to execute for this App Run
         action_id = self.get_action_identifier()
 
         self.debug_print("action_id", self.get_action_identifier())
@@ -90,14 +81,9 @@ class SysdigConnector(BaseConnector):
         return ret_val
 
     def initialize(self):
-
-        # Load the state in initialize, use it to store data
-        # that needs to be accessed across actions
         self._state = self.load_state()
 
-        # get the asset config
         config = self.get_config()
-
         self._duration_in_seconds = config['duration_in_seconds']
         self._kubernetes_config = config['kubernetes_config']
         self._sysdig_api_token = config['sysdig_api_token']
@@ -108,15 +94,14 @@ class SysdigConnector(BaseConnector):
         kubernetes_config.close()
 
         self._kubernetes_client = KubernetesClient(kubernetes_config.name)
-        self._sysdig_client = SdSecureClient(token=self._sysdig_api_token, sdc_url=self._sysdig_api_endpoint)
+        self._sysdig_client = SdSecureClient(token=self._sysdig_api_token,
+                                             sdc_url=self._sysdig_api_endpoint)
 
         os.remove(kubernetes_config.name)
 
         return phantom.APP_SUCCESS
 
     def finalize(self):
-
-        # Save the state, this data is saved accross actions and app upgrades
         self.save_state(self._state)
         return phantom.APP_SUCCESS
 
